@@ -31,16 +31,27 @@ export async function createConsultation(formData: FormData) {
   redirect("/");
 }
 
-// 2. 병원 목록 가져오기 (이게 없어서 에러가 났던 겁니다!)
+// 2. 병원 목록 가져오기 (안전 모드: 날짜 제외)
 export async function getHospitals() {
   try {
     const hospitals = await db.hospital.findMany({
       orderBy: { rating: 'desc' },
+      // 👇 화면에 필요한 정보만 골라서 가져옵니다 (날짜 충돌 방지)
+      select: {
+        id: true,
+        name: true,
+        location: true,
+        tags: true,
+        rating: true,
+        reviews: true,
+        image: true,
+        desc: true,
+      }
     });
     return hospitals;
   } catch (error) {
     console.error("병원 목록 불러오기 실패:", error);
-    return [];
+    return []; // 에러 나면 빈 배열 반환 (화면 안 꺼짐)
   }
 }
 
@@ -97,5 +108,56 @@ export async function seedInitialHospitals() {
         desc: "365일 4계절 5감 만족, 삼사오성형외과"
       },
     ]
+  });
+}
+// 4. 병원 상세 정보 가져오기 (의사, 메뉴, 리뷰 포함)
+export async function getHospitalById(id: string) {
+  try {
+    const hospital = await db.hospital.findUnique({
+      where: { id },
+      include: {
+        doctors: true,
+        menus: true,
+        userReviews: {
+          orderBy: { createdAt: 'desc' }, // 최신 리뷰 순
+        },
+      },
+    });
+    return hospital;
+  } catch (error) {
+    return null;
+  }
+}
+
+// 5. 리뷰 작성하기
+export async function addReview(hospitalId: string, userName: string, rating: number, content: string) {
+  try {
+    await db.review.create({
+      data: {
+        hospitalId,
+        userName,
+        rating,
+        content,
+      },
+    });
+    revalidatePath(`/hospitals/${hospitalId}`); // 페이지 새로고침
+  } catch (error) {
+    console.error("리뷰 작성 실패:", error);
+  }
+}
+
+// 6. 검색 기능 (이름이나 태그로 찾기)
+export async function searchHospitals(keyword: string) {
+  if (!keyword) return getHospitals();
+  
+  return await db.hospital.findMany({
+    where: {
+      OR: [
+        { name: { contains: keyword } },
+        { tags: { contains: keyword } },
+        { location: { contains: keyword } },
+      ],
+    },
+    orderBy: { rating: 'desc' },
   });
 }
