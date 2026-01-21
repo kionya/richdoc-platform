@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, MapPin, Check, Plus, X, ArrowRight, RefreshCcw } from "lucide-react";
-import { getHospitals, seedInitialHospitals } from "@/app/actions"; // 👈 배달원 소환
+import { Star, MapPin, Check, Plus, ArrowRight, X } from "lucide-react";
+import { getHospitals, seedInitialHospitals, createConsultation } from "@/app/actions";
 
-// 병원 데이터 타입 정의
 interface Hospital {
-  id: number;
+  id: string; // ID가 문자열(uuid)로 바뀌었으므로 string
   name: string;
   location: string;
   tags: string;
@@ -18,10 +17,12 @@ interface Hospital {
 
 export default function HospitalListPage() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [compareList, setCompareList] = useState<number[]>([]);
+  const [compareList, setCompareList] = useState<string[]>([]); // ID가 문자열이라 string[]
   const [isLoading, setIsLoading] = useState(true);
+  
+  // 팝업(모달) 상태 관리
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 1. 화면이 켜지면 DB에서 병원 목록 가져오기
   useEffect(() => {
     loadData();
   }, []);
@@ -29,21 +30,12 @@ export default function HospitalListPage() {
   const loadData = async () => {
     setIsLoading(true);
     const data = await getHospitals();
+    // @ts-ignore (타입 충돌 방지용)
     setHospitals(data);
     setIsLoading(false);
   };
 
-  // 2. (초기 세팅용) 데이터가 없을 때 누르는 버튼 기능
-  const handleSeed = async () => {
-    if (confirm("초기 데이터를 DB에 넣으시겠습니까?")) {
-      await seedInitialHospitals();
-      alert("데이터 주입 완료! 새로고침됩니다.");
-      loadData();
-    }
-  };
-
-  // 비교함 기능
-  const toggleCompare = (id: number) => {
+  const toggleCompare = (id: string) => {
     if (compareList.includes(id)) {
       setCompareList(compareList.filter((item) => item !== id));
     } else {
@@ -54,6 +46,12 @@ export default function HospitalListPage() {
       setCompareList([...compareList, id]);
     }
   };
+
+  // 선택한 병원 이름들 가져오기 (DB에 저장하기 위해)
+  const selectedHospitalNames = hospitals
+    .filter(h => compareList.includes(h.id))
+    .map(h => h.name)
+    .join(", ");
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
@@ -67,12 +65,6 @@ export default function HospitalListPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">🏥 실시간 제휴 병원</h1>
-          {/* 👇 데이터가 하나도 없을 때만 보이는 '초기화 버튼' */}
-          {hospitals.length === 0 && !isLoading && (
-            <button onClick={handleSeed} className="text-xs bg-gray-800 text-white px-3 py-2 rounded flex items-center gap-2">
-              <RefreshCcw className="w-3 h-3"/> 초기 데이터 넣기 (관리자용)
-            </button>
-          )}
         </div>
         
         {isLoading ? (
@@ -81,7 +73,6 @@ export default function HospitalListPage() {
           <div className="grid gap-6">
             {hospitals.map((hospital) => {
               const isSelected = compareList.includes(hospital.id);
-              
               return (
                 <div key={hospital.id} className={`bg-white rounded-2xl p-4 shadow-sm border transition-all ${isSelected ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-100 hover:border-blue-300'}`}>
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -101,7 +92,6 @@ export default function HospitalListPage() {
                       </div>
                       <p className="text-gray-600 text-sm mt-2 line-clamp-1">{hospital.desc}</p>
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {/* 태그가 콤마로 되어있으므로 쪼개서 보여줌 */}
                         {hospital.tags.split(',').map((tag) => (
                           <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs font-medium">
                             #{tag}
@@ -111,12 +101,9 @@ export default function HospitalListPage() {
                     </div>
                   </div>
                   <div className="mt-4 pt-4 border-t flex justify-end gap-2">
-                     <button className="px-4 py-2 text-sm text-gray-600 font-medium hover:bg-gray-50 rounded-lg">
-                       상세보기
-                     </button>
                      <button 
                       onClick={() => toggleCompare(hospital.id)}
-                      className={`flex items-center px-4 py-2 text-sm font-bold rounded-lg transition-colors ${
+                      className={`flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-colors w-full sm:w-auto justify-center ${
                         isSelected ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : "bg-blue-600 text-white hover:bg-blue-700"
                       }`}
                      >
@@ -132,25 +119,66 @@ export default function HospitalListPage() {
 
       {/* 비교함 바 (장바구니) */}
       {compareList.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full bg-white border-t shadow-2xl p-4 z-50 animate-slide-up">
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t shadow-2xl p-4 z-40 animate-slide-up">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">
                 {compareList.length}
               </div>
               <div className="hidden sm:block">
-                <p className="font-bold text-gray-900">비교함에 담긴 병원</p>
-                <p className="text-xs text-gray-500">최대 3개까지 비교 가능합니다.</p>
+                <p className="font-bold text-gray-900">선택한 병원 비교하기</p>
+                <p className="text-xs text-gray-500">{selectedHospitalNames}</p>
               </div>
             </div>
             <div className="flex gap-2">
                <button onClick={() => setCompareList([])} className="px-4 py-3 text-gray-500 text-sm font-medium hover:text-gray-700">
                  초기화
                </button>
-               <button className="bg-blue-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 flex items-center shadow-lg">
-                 비교견적 요청하기 <ArrowRight className="w-4 h-4 ml-2" />
+               <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-blue-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 flex items-center shadow-lg"
+               >
+                 견적 요청 <ArrowRight className="w-4 h-4 ml-2" />
                </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 👇 견적 요청 팝업 (모달) */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in relative">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <h3 className="text-xl font-bold mb-2">비교 견적 요청서</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              선택하신 <span className="text-blue-600 font-bold">{compareList.length}개 병원</span>의 견적을 비교해드립니다.
+            </p>
+
+            <form action={createConsultation} className="space-y-4">
+              {/* 숨겨진 정보 (어떤 병원을 선택했는지 몰래 보냄) */}
+              <input type="hidden" name="content" value={`[비교견적요청] 선택병원: ${selectedHospitalNames}`} />
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">이름</label>
+                <input name="customerName" type="text" placeholder="홍길동" className="w-full border p-3 rounded-lg bg-gray-50" />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">연락처 (필수)</label>
+                <input name="phone" type="tel" placeholder="010-1234-5678" required className="w-full border p-3 rounded-lg bg-gray-50" />
+              </div>
+
+              <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 mt-2">
+                무료 견적 받기
+              </button>
+            </form>
           </div>
         </div>
       )}
