@@ -1,49 +1,37 @@
-'use server'
+"use server";
 
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createLead(formData: FormData) {
+// 👇 함수 이름이 'createConsultation' 이어야 합니다!
+export async function createConsultation(formData: FormData) {
+  const phone = formData.get("phone") as string;
+  const content = formData.get("content") as string;
+  const customerName = (formData.get("customerName") as string) || "익명 고객";
   
-  const userName = formData.get("name") as string;
-  const userContact = formData.get("contact") as string;
-  const userConcern = formData.get("concern") as string;
-  const hospitalId = formData.get("hospitalId") as string;
-  
-  // 1. 사진 파일 가져오기
-  const photoFile = formData.get("photo") as File;
-  let photoData = null;
-
-  // 2. 사진이 있다면 '문자열'로 변환하기 (Base64 인코딩)
-  if (photoFile && photoFile.size > 0) {
-    const buffer = Buffer.from(await photoFile.arrayBuffer());
-    photoData = `data:${photoFile.type};base64,${buffer.toString("base64")}`;
+  // 필수값 체크
+  if (!phone || !content) {
+    return;
   }
 
-  const referralCode = `RD-${Math.floor(Math.random() * 10000)}`;
+  try {
+    // DB에 저장
+    await db.consultation.create({
+      data: {
+        phone,
+        content,
+        customerName,
+      },
+    });
 
-  // 임시 유저 생성
-  const newUser = await db.user.create({
-    data: {
-      email: `${referralCode}@temp.com`,
-      name: userName,
-      phone: userContact,
-    }
-  });
+    // 관리자 페이지 새로고침
+    revalidatePath("/admin");
+    
+  } catch (error) {
+    console.error("에러 발생:", error);
+  }
 
-  // 3. 사진 데이터(photoData)까지 함께 저장
-  await db.lead.create({
-    data: {
-      referralCode: referralCode,
-      status: "PENDING",
-      concern: userConcern,
-      hospitalId: hospitalId,
-      userId: newUser.id,
-      photo: photoData, // 👈 여기에 사진이 저장됩니다
-    }
-  });
-
-  console.log(`✅ 상담 접수 완료 (사진 포함)! 코드: ${referralCode}`);
-
-  redirect(`/success?code=${referralCode}`);
+  // 성공하면 메인으로 이동 (또는 성공 페이지)
+  redirect("/");
 }
