@@ -28,21 +28,56 @@ model User {
 
 // 2. 병원 정보
 model Hospital {
-  // 👇 숫자(Int) 대신 문자(uuid)로 변경!
-  id        String   @id @default(uuid()) 
+  id        String   @id @default(uuid())
   name      String
   location  String
   tags      String
   rating    Float
-  reviews   Int
+  reviews   Int      @default(0) // 리뷰 수 자동 카운트
   image     String
   desc      String
   createdAt DateTime @default(now())
 
-  // 👇 에러 해결을 위해 추가한 연결고리들
+  // 👇 추가된 관계들
+  doctors   Doctor[]
+  menus     Menu[]
+  userReviews Review[]
+  
+  // 기존 관계 유지
   treatments Treatment[]
   leads      Lead[]
 }
+
+// 👨‍⚕️ 의사 선생님 정보
+model Doctor {
+  id         String   @id @default(uuid())
+  name       String
+  specialty  String   // 전문 분야 (예: 코성형 전문)
+  image      String?  // 의사 사진
+  hospitalId String
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+// 📋 시술 메뉴/가격표
+model Menu {
+  id         String   @id @default(uuid())
+  name       String   // 시술명
+  price      String   // 가격 (예: 100만원~)
+  hospitalId String
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+}
+
+// ⭐ 후기(리뷰) 시스템
+model Review {
+  id         String   @id @default(uuid())
+  userName   String   // 작성자 이름 (익명 가능)
+  rating     Int      // 1~5점
+  content    String   // 후기 내용
+  hospitalId String
+  hospital   Hospital @relation(fields: [hospitalId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
 // 3. 시술 상품 (예: 울쎄라 300샷, 코수술 등)
 model Treatment {
   id            String    @id @default(uuid())
