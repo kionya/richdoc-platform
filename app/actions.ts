@@ -4,19 +4,17 @@ import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-// 👇 함수 이름이 'createConsultation' 이어야 합니다!
+// 1. 상담 신청 저장하기
 export async function createConsultation(formData: FormData) {
   const phone = formData.get("phone") as string;
   const content = formData.get("content") as string;
   const customerName = (formData.get("customerName") as string) || "익명 고객";
   
-  // 필수값 체크
   if (!phone || !content) {
     return;
   }
 
   try {
-    // DB에 저장
     await db.consultation.create({
       data: {
         phone,
@@ -24,25 +22,33 @@ export async function createConsultation(formData: FormData) {
         customerName,
       },
     });
-
-    // 관리자 페이지 새로고침
     revalidatePath("/admin");
-    
   } catch (error) {
     console.error("에러 발생:", error);
   }
-
-  // 성공하면 메인으로 이동 (또는 성공 페이지)
+  
+  // 메인으로 이동
   redirect("/");
 }
 
-// app/actions.ts 안의 seedInitialHospitals 함수를 이걸로 교체!
+// 2. 병원 목록 가져오기 (이게 없어서 에러가 났던 겁니다!)
+export async function getHospitals() {
+  try {
+    const hospitals = await db.hospital.findMany({
+      orderBy: { rating: 'desc' },
+    });
+    return hospitals;
+  } catch (error) {
+    console.error("병원 목록 불러오기 실패:", error);
+    return [];
+  }
+}
 
+// 3. 초기 데이터(병원 5개) 넣기
 export async function seedInitialHospitals() {
   const count = await db.hospital.count();
-  if (count > 0) return; // 이미 데이터가 있으면 패스
+  if (count > 0) return; // 데이터가 있으면 중복 생성 방지
 
-  // 이사님이 요청하신 5개 병원 리스트
   await db.hospital.createMany({
     data: [
       {
