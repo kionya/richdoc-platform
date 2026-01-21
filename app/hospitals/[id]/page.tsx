@@ -2,20 +2,20 @@ import { getHospitalById, addReview } from "@/app/actions";
 import { Star, User, DollarSign, MapPin, ArrowLeft, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
-// 👇 최신 Next.js 호환을 위한 타입 정의
+// 👇 Next.js 15버전 호환 타입 (Promise)
 type Props = {
   params: Promise<{ id: string }>;
 };
 
 export default async function HospitalDetailPage(props: Props) {
-  // 1. ID 가져오기 (비동기 처리)
+  // ⭐⭐ 여기가 핵심입니다! await으로 기다렸다가 ID를 꺼내야 합니다.
   const params = await props.params;
   const hospitalId = params.id;
   
-  // 2. 데이터 가져오기
+  // 데이터 가져오기
   const hospital = await getHospitalById(hospitalId);
 
-  // 3. 데이터가 없을 때 (에러 처리)
+  // 1. 데이터가 없을 때 (에러 처리)
   if (!hospital) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
@@ -23,7 +23,8 @@ export default async function HospitalDetailPage(props: Props) {
           <h2 className="text-xl font-bold text-red-600 mb-2">⚠ 병원을 찾을 수 없습니다.</h2>
           <p className="text-gray-600 mb-4">요청하신 ID가 데이터베이스에 없습니다.</p>
           <div className="bg-white p-3 rounded border text-xs text-left font-mono text-gray-500 break-all">
-            <strong>Requested ID:</strong> {hospitalId ? hospitalId : "(ID가 비어있음)"}
+            {/* ID가 비어있는지 확인하는 디버깅용 코드 */}
+            <strong>Requested ID:</strong> {hospitalId ? hospitalId : "(ID 감지 실패! await params 확인 필요)"}
           </div>
         </div>
         <Link href="/hospitals" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
@@ -33,10 +34,10 @@ export default async function HospitalDetailPage(props: Props) {
     );
   }
 
-  // 안전장치: 태그 분리
+  // 안전장치
   const tagsArray = (hospital.tags || "").split(',');
 
-  // 리뷰 작성 함수 (서버 액션)
+  // 리뷰 작성 함수
   async function submitReview(formData: FormData) {
     "use server";
     const userName = formData.get("userName") as string;
@@ -47,13 +48,11 @@ export default async function HospitalDetailPage(props: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* 1. 상단 헤더 */}
       <div className="bg-white sticky top-0 z-10 px-4 h-14 flex items-center shadow-sm">
         <Link href="/hospitals" className="mr-4"><ArrowLeft className="w-6 h-6" /></Link>
         <h1 className="font-bold text-lg truncate">{hospital.name}</h1>
       </div>
 
-      {/* 2. 메인 이미지 */}
       <div className="relative h-64 bg-gray-200">
         <img src={hospital.image || ""} alt={hospital.name} className="w-full h-full object-cover" />
         <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-6 pt-20">
@@ -65,7 +64,6 @@ export default async function HospitalDetailPage(props: Props) {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 -mt-6 relative z-0">
-        {/* 3. 기본 정보 (평점, 설명) */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center text-yellow-500 font-bold text-lg">
@@ -81,25 +79,25 @@ export default async function HospitalDetailPage(props: Props) {
           </div>
         </div>
 
-        {/* 4. 대표 의료진 (데이터 있을 때만 표시) */}
+        {/* 의료진 정보 */}
         {hospital.doctors && hospital.doctors.length > 0 && (
           <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
             <h3 className="font-bold text-lg mb-4 flex items-center"><User className="w-5 h-5 mr-2 text-blue-600"/> 대표 의료진</h3>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex gap-4 overflow-x-auto pb-2">
               {hospital.doctors.map(doc => (
                 <div key={doc.id} className="flex-shrink-0 w-24 text-center">
-                  <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-2 overflow-hidden border border-gray-100">
-                     <div className="w-full h-full bg-gray-100 flex items-center justify-center text-2xl">👨‍⚕️</div>
+                  <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-2 overflow-hidden bg-gray-100 flex items-center justify-center text-2xl">
+                     👨‍⚕️
                   </div>
-                  <div className="font-bold text-sm text-gray-900">{doc.name}</div>
-                  <div className="text-xs text-gray-500 mt-1">{doc.specialty}</div>
+                  <div className="font-bold text-sm text-gray-900 mt-2">{doc.name}</div>
+                  <div className="text-xs text-gray-500">{doc.specialty}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* 5. ⭐ 시술 가격표 (여기에 추가했습니다!) ⭐ */}
+        {/* ⭐ 시술 가격표 (여기가 중요!) ⭐ */}
         {hospital.menus && hospital.menus.length > 0 && (
           <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
             <h3 className="font-bold text-lg mb-4 flex items-center">
@@ -107,7 +105,7 @@ export default async function HospitalDetailPage(props: Props) {
             </h3>
             <ul className="space-y-3">
               {hospital.menus.map((menu) => (
-                <li key={menu.id} className="flex justify-between items-center border-b border-gray-50 pb-3 last:border-0 last:pb-0">
+                <li key={menu.id} className="flex justify-between items-center border-b border-gray-50 pb-3 last:border-0">
                   <span className="text-gray-700 font-medium">{menu.name}</span>
                   <span className="font-bold text-blue-600">{menu.price}</span>
                 </li>
@@ -116,36 +114,33 @@ export default async function HospitalDetailPage(props: Props) {
           </div>
         )}
 
-        {/* 6. 실제 후기 */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-20">
           <h3 className="font-bold text-lg mb-4 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-blue-600"/> 실제 후기</h3>
           
           <form action={submitReview} className="mb-8 bg-gray-50 p-4 rounded-xl border border-gray-100">
             <div className="mb-3">
-              <input name="userName" placeholder="이름 (익명)" className="border p-3 rounded-lg w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-              <select name="rating" className="border p-3 rounded-lg w-full mb-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <input name="userName" placeholder="이름 (익명)" className="border p-3 rounded-lg w-full mb-2" required />
+              <select name="rating" className="border p-3 rounded-lg w-full mb-2 bg-white">
                 <option value="5">⭐⭐⭐⭐⭐ (최고예요)</option>
                 <option value="4">⭐⭐⭐⭐ (좋아요)</option>
                 <option value="3">⭐⭐⭐ (보통이에요)</option>
-                <option value="2">⭐⭐ (별로예요)</option>
-                <option value="1">⭐ (나빠요)</option>
               </select>
-              <textarea name="content" placeholder="솔직한 후기를 남겨주세요" className="border p-3 rounded-lg w-full h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" required></textarea>
+              <textarea name="content" placeholder="솔직한 후기를 남겨주세요" className="border p-3 rounded-lg w-full h-24 resize-none" required></textarea>
             </div>
-            <button className="bg-blue-600 text-white px-4 py-3 rounded-xl text-sm w-full font-bold hover:bg-blue-700 transition">후기 등록하기</button>
+            <button className="bg-blue-600 text-white px-4 py-3 rounded-xl text-sm w-full font-bold">후기 등록</button>
           </form>
 
           <div className="space-y-6">
             {(!hospital.userReviews || hospital.userReviews.length === 0) ? (
-              <p className="text-gray-400 text-center text-sm py-4">아직 등록된 후기가 없습니다.<br/>첫 번째 후기를 남겨보세요!</p>
+              <p className="text-gray-400 text-center text-sm py-4">아직 등록된 후기가 없습니다.</p>
             ) : (
               hospital.userReviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0">
+                <div key={review.id} className="border-b border-gray-100 pb-4">
                   <div className="flex justify-between mb-2">
-                    <span className="font-bold text-sm text-gray-900">{review.userName}</span>
+                    <span className="font-bold text-sm">{review.userName}</span>
                     <span className="text-yellow-400 text-xs">{"⭐".repeat(review.rating)}</span>
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg">{review.content}</p>
+                  <p className="text-gray-600 text-sm">{review.content}</p>
                   <div className="text-xs text-gray-400 mt-2 text-right">{review.createdAt.toLocaleDateString()}</div>
                 </div>
               ))
@@ -154,9 +149,8 @@ export default async function HospitalDetailPage(props: Props) {
         </div>
       </div>
 
-      {/* 7. 하단 고정 버튼 */}
       <div className="fixed bottom-0 w-full bg-white border-t p-4 z-20 safe-area-bottom">
-        <Link href="/" className="block w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-lg shadow-xl text-center hover:bg-blue-700 transition">
+        <Link href="/" className="block w-full bg-blue-600 text-white font-bold py-4 rounded-xl text-lg shadow-xl text-center">
           이 병원 상담 신청하기
         </Link>
       </div>
