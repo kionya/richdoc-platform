@@ -62,11 +62,9 @@ export async function getHospitalById(id: string) {
     const hospital = await db.hospital.findUnique({
       where: { id },
       include: {
-        userReviews: {
-          orderBy: { createdAt: 'desc' },
-        },
+        userReviews: { orderBy: { createdAt: 'desc' } },
         doctors: true,
-        menus: true,
+        menus: true,   // 👈 ⭐ 이 줄이 없으면 가격표가 절대 안 나옵니다! 꼭 확인하세요!
       },
     });
     return hospital;
