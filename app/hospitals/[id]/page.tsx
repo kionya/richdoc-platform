@@ -2,12 +2,20 @@ import { getHospitalById, addReview } from "@/app/actions";
 import { Star, User, DollarSign, MapPin, ArrowLeft, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
-export default async function HospitalDetailPage({ params }: { params: { id: string } }) {
-  // 1. ID가 제대로 넘어오는지 확인
+// 👇 최신 Next.js 타입을 위해 수정
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function HospitalDetailPage(props: Props) {
+  // ⭐⭐ 여기가 핵심! params를 기다렸다가(await) 까봐야 합니다.
+  const params = await props.params;
   const hospitalId = params.id;
+  
+  // 이제 hospitalId에 "hospital-3"이 정확히 들어갑니다.
   const hospital = await getHospitalById(hospitalId);
 
-  // 2. 병원이 없을 때 '어떤 ID를 찾았는지' 화면에 보여줌 (범인 색출용)
+  // 1. 데이터가 없을 때 (에러 처리)
   if (!hospital) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
@@ -15,7 +23,7 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
           <h2 className="text-xl font-bold text-red-600 mb-2">⚠ 병원을 찾을 수 없습니다.</h2>
           <p className="text-gray-600 mb-4">요청하신 ID가 데이터베이스에 없습니다.</p>
           <div className="bg-white p-3 rounded border text-xs text-left font-mono text-gray-500 break-all">
-            <strong>Requested ID:</strong><br/> {hospitalId}
+            <strong>Requested ID:</strong> {hospitalId ? hospitalId : "(ID가 비어있음)"}
           </div>
         </div>
         <Link href="/hospitals" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
@@ -25,10 +33,10 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
     );
   }
 
-  // 안전장치: 태그가 null일 경우 대비
+  // 2. 안전장치: 태그가 null일 경우 대비
   const tagsArray = (hospital.tags || "").split(',');
 
-  // 리뷰 작성 함수
+  // 3. 리뷰 작성 함수
   async function submitReview(formData: FormData) {
     "use server";
     const userName = formData.get("userName") as string;
@@ -39,11 +47,13 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+      {/* 상단 네비게이션 */}
       <div className="bg-white sticky top-0 z-10 px-4 h-14 flex items-center shadow-sm">
         <Link href="/hospitals" className="mr-4"><ArrowLeft className="w-6 h-6" /></Link>
         <h1 className="font-bold text-lg truncate">{hospital.name}</h1>
       </div>
 
+      {/* 메인 이미지 */}
       <div className="relative h-64 bg-gray-200">
         <img src={hospital.image || ""} alt={hospital.name} className="w-full h-full object-cover" />
         <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-6 pt-20">
@@ -55,12 +65,12 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
       </div>
 
       <div className="max-w-3xl mx-auto px-4 -mt-6 relative z-0">
+        {/* 기본 정보 */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center text-yellow-500 font-bold text-lg">
               <Star className="w-5 h-5 fill-current mr-1" /> {hospital.rating}
             </div>
-            {/* 리뷰 개수 안전하게 표시 */}
             <span className="text-gray-400 text-sm">리뷰 {hospital.userReviews?.length || 0}개</span>
           </div>
           <p className="text-gray-600 leading-relaxed">{hospital.desc}</p>
@@ -71,7 +81,7 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
           </div>
         </div>
 
-        {/* 의사 정보가 있을 때만 표시 */}
+        {/* 의사 정보 (데이터 있을 때만 표시) */}
         {hospital.doctors && hospital.doctors.length > 0 && (
           <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
             <h3 className="font-bold text-lg mb-4 flex items-center"><User className="w-5 h-5 mr-2 text-blue-600"/> 대표 의료진</h3>
@@ -79,7 +89,6 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
               {hospital.doctors.map(doc => (
                 <div key={doc.id} className="flex-shrink-0 w-24 text-center">
                   <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-2 overflow-hidden">
-                    {/* 의사 이미지 없으면 기본 아이콘 */}
                      <div className="w-full h-full bg-gray-300 flex items-center justify-center">👨‍⚕️</div>
                   </div>
                   <div className="font-bold text-sm">{doc.name}</div>
@@ -90,6 +99,7 @@ export default async function HospitalDetailPage({ params }: { params: { id: str
           </div>
         )}
 
+        {/* 리뷰 영역 */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-20">
           <h3 className="font-bold text-lg mb-4 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-blue-600"/> 실제 후기</h3>
           
