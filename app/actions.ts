@@ -101,6 +101,7 @@ export async function seedInitialHospitals() {
   await db.hospital.createMany({
     data: [
       {
+        id: "hospital-1", // 👈 ID를 고정시켰습니다! (이제 안 바뀜)
         name: "리쥬엘의원 강남점",
         location: "서울 강남구 강남대로",
         tags: "리프팅,피부관리,보톡스",
@@ -110,6 +111,7 @@ export async function seedInitialHospitals() {
         desc: "당신의 피부를 위한 프리미엄 솔루션, 리쥬엘입니다."
       },
       {
+        id: "hospital-2",
         name: "고운몸의원",
         location: "서울 강남구 테헤란로",
         tags: "다이어트,체형교정,지방분해",
@@ -119,6 +121,7 @@ export async function seedInitialHospitals() {
         desc: "건강하고 아름다운 바디라인을 약속합니다."
       },
       {
+        id: "hospital-3",
         name: "바노바기성형외과",
         location: "서울 강남구 논현로",
         tags: "안면윤곽,양악수술,가슴성형",
@@ -128,6 +131,7 @@ export async function seedInitialHospitals() {
         desc: "디테일이 다른 아름다움, 바노바기입니다."
       },
       {
+        id: "hospital-4",
         name: "바이브성형외과",
         location: "서울 강남구 도산대로",
         tags: "눈성형,코성형,트렌디",
@@ -137,6 +141,7 @@ export async function seedInitialHospitals() {
         desc: "나만의 분위기를 찾아주는 바이브 성형외과"
       },
       {
+        id: "hospital-5",
         name: "삼사오성형외과",
         location: "서울 서초구 강남대로",
         tags: "안전지향,대형병원,종합성형",
