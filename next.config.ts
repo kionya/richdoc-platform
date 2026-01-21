@@ -2,10 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   typescript: {
-    // 타입스크립트 에러는 여기서 무시
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // 이건 남겨두세요! (타입스크립트 무시)
   },
-  // ❌ eslint 설정은 여기서 삭제했습니다.
+  // ❌ eslint: { ... }  <-- 이 부분이 있으면 안 됩니다! 지워주세요.
 };
 
 export default nextConfig;
