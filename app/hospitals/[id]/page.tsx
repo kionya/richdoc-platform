@@ -3,16 +3,23 @@ import { Star, User, DollarSign, MapPin, ArrowLeft, MessageSquare } from "lucide
 import Link from "next/link";
 
 export default async function HospitalDetailPage({ params }: { params: { id: string } }) {
-  // 데이터 가져오기
-  const hospital = await getHospitalById(params.id);
+  // 1. ID가 제대로 넘어오는지 확인
+  const hospitalId = params.id;
+  const hospital = await getHospitalById(hospitalId);
 
-  // 데이터가 없으면 안내 문구 표시 (에러 대신)
+  // 2. 병원이 없을 때 '어떤 ID를 찾았는지' 화면에 보여줌 (범인 색출용)
   if (!hospital) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <h2 className="text-xl font-bold mb-4">병원을 찾을 수 없습니다.</h2>
-        <Link href="/hospitals" className="bg-blue-600 text-white px-4 py-2 rounded-lg">
-          목록으로 돌아가기
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        <div className="bg-red-50 p-6 rounded-xl border border-red-200 mb-6 max-w-md">
+          <h2 className="text-xl font-bold text-red-600 mb-2">⚠ 병원을 찾을 수 없습니다.</h2>
+          <p className="text-gray-600 mb-4">요청하신 ID가 데이터베이스에 없습니다.</p>
+          <div className="bg-white p-3 rounded border text-xs text-left font-mono text-gray-500 break-all">
+            <strong>Requested ID:</strong><br/> {hospitalId}
+          </div>
+        </div>
+        <Link href="/hospitals" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">
+          목록으로 돌아가서 다시 선택하기
         </Link>
       </div>
     );

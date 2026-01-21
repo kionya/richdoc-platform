@@ -56,9 +56,9 @@ export async function getHospitalById(id: string) {
     const hospital = await db.hospital.findUnique({
       where: { id },
       include: {
-        userReviews: { orderBy: { createdAt: 'desc' } }, // 리뷰 포함
-        doctors: true, // 의사 정보 포함
-        menus: true,   // 시술 메뉴 포함
+        userReviews: { orderBy: { createdAt: 'desc' } },
+        doctors: true,
+        menus: true,
       },
     });
     return hospital;
