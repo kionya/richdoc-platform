@@ -14,12 +14,17 @@ export async function createConsultation(formData: FormData) {
 
   try {
     await db.consultation.create({
-      data: { phone, content, customerName },
+      data: {
+        phone,
+        content,
+        customerName,
+      },
     });
     revalidatePath("/admin");
   } catch (error) {
     console.error("상담 신청 에러:", error);
   }
+  
   redirect("/");
 }
 
@@ -39,6 +44,7 @@ export async function getHospitals() {
         desc: true,
       }
     });
+    // 데이터 가공 (null 방지)
     return hospitals.map(h => ({
       ...h,
       tags: h.tags || "",
@@ -50,13 +56,15 @@ export async function getHospitals() {
   }
 }
 
-// 3. 병원 상세 정보 가져오기 (⭐ 이게 없어서 에러가 났습니다!)
+// 3. 병원 상세 정보 가져오기 (상세 페이지용)
 export async function getHospitalById(id: string) {
   try {
     const hospital = await db.hospital.findUnique({
       where: { id },
       include: {
-        userReviews: { orderBy: { createdAt: 'desc' } },
+        userReviews: {
+          orderBy: { createdAt: 'desc' },
+        },
         doctors: true,
         menus: true,
       },
@@ -72,7 +80,12 @@ export async function getHospitalById(id: string) {
 export async function addReview(hospitalId: string, userName: string, rating: number, content: string) {
   try {
     await db.review.create({
-      data: { hospitalId, userName, rating, content },
+      data: {
+        hospitalId,
+        userName,
+        rating,
+        content,
+      },
     });
     revalidatePath(`/hospitals/${hospitalId}`);
   } catch (error) {
@@ -80,8 +93,8 @@ export async function addReview(hospitalId: string, userName: string, rating: nu
   }
 }
 
-// 5. 초기 데이터 넣기
-eexport async function seedInitialHospitals() {
+// 5. 초기 데이터 넣기 (강제 새로고침 기능 포함)
+export async function seedInitialHospitals() {
   const count = await db.hospital.count();
   if (count > 0) return;
 
@@ -135,7 +148,7 @@ eexport async function seedInitialHospitals() {
     ]
   });
 
-  // ⭐⭐ 여기가 핵심! 강제로 최신 데이터를 불러오게 함 ⭐⭐
-  revalidatePath("/hospitals"); 
+  // 강제로 화면 갱신
+  revalidatePath("/hospitals");
   revalidatePath("/");
 }
