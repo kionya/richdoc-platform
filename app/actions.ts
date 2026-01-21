@@ -81,7 +81,7 @@ export async function addReview(hospitalId: string, userName: string, rating: nu
 }
 
 // 5. 초기 데이터 넣기
-export async function seedInitialHospitals() {
+eexport async function seedInitialHospitals() {
   const count = await db.hospital.count();
   if (count > 0) return;
 
@@ -134,4 +134,8 @@ export async function seedInitialHospitals() {
       },
     ]
   });
+
+  // ⭐⭐ 여기가 핵심! 강제로 최신 데이터를 불러오게 함 ⭐⭐
+  revalidatePath("/hospitals"); 
+  revalidatePath("/");
 }
