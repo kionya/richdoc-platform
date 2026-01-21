@@ -1,0 +1,95 @@
+// 이 파일은 데이터베이스의 구조를 정의하는 설계도입니다.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // Vercel용 주소
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Vercel용 직통 주소
+}
+
+// 1. 사용자 (환자 + 병원 관리자 + 최고 관리자)
+model User {
+  id            String    @id @default(uuid()) // 고유 ID 자동생성
+  email         String    @unique              // 이메일은 중복 불가
+  password      String?                        // 비밀번호 (소셜 로그인 시 없을 수 있음)
+  role          String    @default("PATIENT")  // 역할: PATIENT, HOSPITAL, ADMIN
+  name          String?
+  phone         String?
+  country       String?   @default("KR")       // 국가 코드
+  
+  leads         Lead[]                         // 이 사람이 신청한 상담 내역들
+  
+  createdAt     DateTime  @default(now())      // 가입일
+  updatedAt     DateTime  @updatedAt           // 수정일
+}
+
+// 2. 병원 정보
+model Hospital {
+  id            String      @id @default(uuid())
+  name          String      // 병원 이름
+  location      String?     // 주소 (강남구 논현동...)
+  description   String?     // 병원 소개
+  isPartner     Boolean     @default(false)      // 제휴 병원 여부
+  commission    Float       @default(15.0)       // 수수료율 (기본 15%)
+  
+  treatments    Treatment[] // 이 병원의 시술 상품들
+  leads         Lead[]      // 이 병원에 접수된 상담들
+  
+  createdAt     DateTime    @default(now())
+}
+
+// 3. 시술 상품 (예: 울쎄라 300샷, 코수술 등)
+model Treatment {
+  id            String    @id @default(uuid())
+  name          String    // 시술명
+  category      String    // 카테고리 (피부, 성형, 치과...)
+  priceMin      Int       // 최소 가격
+  priceMax      Int       // 최대 가격
+  description   String?   // 시술 상세 설명
+  
+  hospitalId    String    // 어느 병원 상품인지 연결
+  hospital      Hospital  @relation(fields: [hospitalId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+}
+
+// 4. 상담/예약 (Lead) - 비즈니스의 핵심!
+model Lead {
+  id            String    @id @default(uuid())
+  referralCode  String    @unique // 나중에 QR코드로 만들 고유 번호
+  
+  status        String    @default("PENDING") 
+  // 상태값: PENDING(접수) -> VISITED(내원) -> DONE(시술완료/결제) -> CANCELLED
+  
+  concern       String?   // 환자의 고민 (예: "코가 낮아요")
+  quotedPrice   Int?      // 확정된 견적 금액
+  
+  photo         String?   // 👈 [추가] 사진 데이터를 저장할 칸 (Base64 문자열)
+
+  userId        String    // 신청한 환자 ID
+  user          User      @relation(fields: [userId], references: [id])
+  
+  hospitalId    String?   // 지정된 병원 ID (없으면 미지정)
+  hospital      Hospital? @relation(fields: [hospitalId], references: [id])
+
+  settlement    Settlement? // 정산 내역 (1:1 연결)
+  
+  visitedAt     DateTime? // 병원 방문 시간
+  createdAt     DateTime  @default(now())
+}
+
+// 5. 정산 (돈 관리)
+model Settlement {
+  id            String    @id @default(uuid())
+  amount        Int       // 총 결제 금액
+  fee           Int       // 우리가 가져갈 수수료
+  isPaid        Boolean   @default(false) // 병원이 우리한테 입금 했는지 여부
+  
+  leadId        String    @unique // 어떤 상담 건에 대한 정산인지
+  lead          Lead      @relation(fields: [leadId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+}
