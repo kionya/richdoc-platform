@@ -93,3 +93,13 @@ model Settlement {
   
   createdAt     DateTime  @default(now())
 }
+// 👇 맨 아래에 추가하세요!
+model Consultation {
+  id        String   @id @default(uuid())
+  customerName String?
+  phone     String
+  content   String
+  imageUrl  String?
+  password  String?
+  createdAt DateTime @default(now())
+}
