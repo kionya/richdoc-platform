@@ -10,34 +10,24 @@ export async function createConsultation(formData: FormData) {
   const content = formData.get("content") as string;
   const customerName = (formData.get("customerName") as string) || "익명 고객";
   
-  if (!phone || !content) {
-    return;
-  }
+  if (!phone) return;
 
   try {
     await db.consultation.create({
-      data: {
-        phone,
-        content,
-        customerName,
-      },
+      data: { phone, content, customerName },
     });
     revalidatePath("/admin");
   } catch (error) {
-    console.error("에러 발생:", error);
+    console.error("상담 신청 에러:", error);
   }
-  
-  // 메인으로 이동
   redirect("/");
 }
 
-// 2. 병원 목록 가져오기 (Invincible Mode: 절대 에러 안 내기)
+// 2. 병원 목록 가져오기 (안전 모드)
 export async function getHospitals() {
   try {
-    // 1. DB에서 데이터 가져오기
     const hospitals = await db.hospital.findMany({
       orderBy: { rating: 'desc' },
-      // 에러 방지를 위해 필요한 필드만 확실하게 가져옴
       select: {
         id: true,
         name: true,
@@ -49,28 +39,51 @@ export async function getHospitals() {
         desc: true,
       }
     });
-
-    // 2. 데이터가 없으면 빈 배열 반환
-    if (!hospitals) return [];
-
-    // 3. 안전하게 반환 (혹시 모를 null 값 처리)
     return hospitals.map(h => ({
       ...h,
-      tags: h.tags || "", // 태그가 비어있으면 빈 문자열로
-      image: h.image || "", // 이미지가 없으면 빈 문자열로
+      tags: h.tags || "",
+      image: h.image || "",
     }));
-
   } catch (error) {
-    // 4. DB 연결이 실패해도 사이트는 안 꺼지게 함!
-    console.error("🔥 병원 목록 불러오기 실패 (사이트 보호 중):", error);
-    return []; 
+    console.error("병원 목록 로딩 실패:", error);
+    return [];
   }
 }
 
-// 3. 초기 데이터(병원 5개) 넣기
+// 3. 병원 상세 정보 가져오기 (⭐ 이게 없어서 에러가 났습니다!)
+export async function getHospitalById(id: string) {
+  try {
+    const hospital = await db.hospital.findUnique({
+      where: { id },
+      include: {
+        userReviews: { orderBy: { createdAt: 'desc' } }, // 리뷰 포함
+        doctors: true, // 의사 정보 포함
+        menus: true,   // 시술 메뉴 포함
+      },
+    });
+    return hospital;
+  } catch (error) {
+    console.error("상세 정보 로딩 실패:", error);
+    return null;
+  }
+}
+
+// 4. 리뷰 작성하기
+export async function addReview(hospitalId: string, userName: string, rating: number, content: string) {
+  try {
+    await db.review.create({
+      data: { hospitalId, userName, rating, content },
+    });
+    revalidatePath(`/hospitals/${hospitalId}`);
+  } catch (error) {
+    console.error("리뷰 작성 실패:", error);
+  }
+}
+
+// 5. 초기 데이터 넣기
 export async function seedInitialHospitals() {
   const count = await db.hospital.count();
-  if (count > 0) return; // 데이터가 있으면 중복 생성 방지
+  if (count > 0) return;
 
   await db.hospital.createMany({
     data: [
@@ -120,56 +133,5 @@ export async function seedInitialHospitals() {
         desc: "365일 4계절 5감 만족, 삼사오성형외과"
       },
     ]
-  });
-}
-// 4. 병원 상세 정보 가져오기 (의사, 메뉴, 리뷰 포함)
-export async function getHospitalById(id: string) {
-  try {
-    const hospital = await db.hospital.findUnique({
-      where: { id },
-      include: {
-        doctors: true,
-        menus: true,
-        userReviews: {
-          orderBy: { createdAt: 'desc' }, // 최신 리뷰 순
-        },
-      },
-    });
-    return hospital;
-  } catch (error) {
-    return null;
-  }
-}
-
-// 5. 리뷰 작성하기
-export async function addReview(hospitalId: string, userName: string, rating: number, content: string) {
-  try {
-    await db.review.create({
-      data: {
-        hospitalId,
-        userName,
-        rating,
-        content,
-      },
-    });
-    revalidatePath(`/hospitals/${hospitalId}`); // 페이지 새로고침
-  } catch (error) {
-    console.error("리뷰 작성 실패:", error);
-  }
-}
-
-// 6. 검색 기능 (이름이나 태그로 찾기)
-export async function searchHospitals(keyword: string) {
-  if (!keyword) return getHospitals();
-  
-  return await db.hospital.findMany({
-    where: {
-      OR: [
-        { name: { contains: keyword } },
-        { tags: { contains: keyword } },
-        { location: { contains: keyword } },
-      ],
-    },
-    orderBy: { rating: 'desc' },
   });
 }
