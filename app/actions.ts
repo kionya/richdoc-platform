@@ -31,12 +31,13 @@ export async function createConsultation(formData: FormData) {
   redirect("/");
 }
 
-// 2. 병원 목록 가져오기 (안전 모드: 날짜 제외)
+// 2. 병원 목록 가져오기 (Invincible Mode: 절대 에러 안 내기)
 export async function getHospitals() {
   try {
+    // 1. DB에서 데이터 가져오기
     const hospitals = await db.hospital.findMany({
       orderBy: { rating: 'desc' },
-      // 👇 화면에 필요한 정보만 골라서 가져옵니다 (날짜 충돌 방지)
+      // 에러 방지를 위해 필요한 필드만 확실하게 가져옴
       select: {
         id: true,
         name: true,
@@ -48,10 +49,21 @@ export async function getHospitals() {
         desc: true,
       }
     });
-    return hospitals;
+
+    // 2. 데이터가 없으면 빈 배열 반환
+    if (!hospitals) return [];
+
+    // 3. 안전하게 반환 (혹시 모를 null 값 처리)
+    return hospitals.map(h => ({
+      ...h,
+      tags: h.tags || "", // 태그가 비어있으면 빈 문자열로
+      image: h.image || "", // 이미지가 없으면 빈 문자열로
+    }));
+
   } catch (error) {
-    console.error("병원 목록 불러오기 실패:", error);
-    return []; // 에러 나면 빈 배열 반환 (화면 안 꺼짐)
+    // 4. DB 연결이 실패해도 사이트는 안 꺼지게 함!
+    console.error("🔥 병원 목록 불러오기 실패 (사이트 보호 중):", error);
+    return []; 
   }
 }
 
