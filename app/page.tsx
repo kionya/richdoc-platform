@@ -9,7 +9,7 @@ export default function Home() {
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="text-2xl font-bold text-blue-900">RICH DOC</div>
-          <a href="#consult" className="bg-blue-600 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-700 transition">
+          <a href="/hospitals" className="bg-blue-600 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-700 transition">
             무료 상담하기
           </a>
         </div>
