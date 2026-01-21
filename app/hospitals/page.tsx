@@ -1,27 +1,47 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, MapPin, Check, Plus, ArrowRight, X } from "lucide-react";
-import { getHospitals, createConsultation } from "@/app/actions";
-import Link from "next/link"; // 👈 Link 필수!
+import { Star, MapPin, Check, Plus, ArrowRight, X, RefreshCcw } from "lucide-react"; // RefreshCcw 아이콘 추가
+import { getHospitals, createConsultation, seedInitialHospitals } from "@/app/actions"; // seedInitialHospitals 추가
+import Link from "next/link";
 
-// ... (Hospital 인터페이스는 기존과 동일) ...
+interface Hospital {
+  id: string;
+  name: string;
+  location: string;
+  tags: string;
+  rating: number;
+  reviews: number;
+  image: string;
+  desc: string;
+}
 
 export default function HospitalListPage() {
-  const [hospitals, setHospitals] = useState<any[]>([]);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [compareList, setCompareList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      const data = await getHospitals();
-      setHospitals(data);
-      setIsLoading(false);
-    }
-    fetchData();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const data = await getHospitals();
+    // @ts-ignore
+    setHospitals(data);
+    setIsLoading(false);
+  };
+
+  // 👇 삭제됐던 '데이터 넣기' 기능 복구!
+  const handleSeed = async () => {
+    if (confirm("초기 데이터를 DB에 넣으시겠습니까?")) {
+      await seedInitialHospitals();
+      alert("데이터 주입 완료! 페이지를 새로고침합니다.");
+      window.location.reload();
+    }
+  };
 
   const toggleCompare = (id: string) => {
     if (compareList.includes(id)) {
@@ -52,19 +72,34 @@ export default function HospitalListPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">🏥 실시간 제휴 병원</h1>
+          
+          {/* 👇 여기가 다시 살아난 버튼입니다! (데이터가 0개일 때만 보임) */}
+          {hospitals.length === 0 && !isLoading && (
+            <button onClick={handleSeed} className="text-xs bg-gray-900 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gray-700 transition">
+              <RefreshCcw className="w-3 h-3"/> 초기 데이터 복구
+            </button>
+          )}
         </div>
         
         {isLoading ? (
           <p className="text-center py-20 text-gray-500">데이터를 불러오는 중입니다...</p>
+        ) : hospitals.length === 0 ? (
+           <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
+             <p className="text-gray-500 mb-2">등록된 병원이 없습니다.</p>
+             <p className="text-xs text-gray-400">우측 상단 '초기 데이터 복구' 버튼을 눌러주세요.</p>
+           </div>
         ) : (
           <div className="grid gap-6">
             {hospitals.map((hospital) => {
               const isSelected = compareList.includes(hospital.id);
+              // 안전장치: 태그 분리
+              const tagsArray = (hospital.tags || "").split(',');
+
               return (
                 <div key={hospital.id} className={`bg-white rounded-2xl p-4 shadow-sm border transition-all ${isSelected ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-100 hover:border-blue-300'}`}>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link href={`/hospitals/${hospital.id}`} className="block sm:w-32 h-32 flex-shrink-0">
-                       <img src={hospital.image} alt={hospital.name} className="w-full h-full object-cover rounded-xl bg-gray-200" />
+                       <img src={hospital.image || ""} alt={hospital.name} className="w-full h-full object-cover rounded-xl bg-gray-200" />
                     </Link>
                     
                     <div className="flex-1">
@@ -84,8 +119,8 @@ export default function HospitalListPage() {
                       </div>
                       <p className="text-gray-600 text-sm mt-2 line-clamp-1">{hospital.desc}</p>
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {hospital.tags.split(',').map((tag: string) => (
-                          <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs font-medium">
+                        {tagsArray.map((tag: string, idx: number) => (
+                          <span key={idx} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs font-medium">
                             #{tag}
                           </span>
                         ))}
@@ -93,7 +128,6 @@ export default function HospitalListPage() {
                     </div>
                   </div>
                   
-                  {/* 👇 [수정됨] 버튼 영역 */}
                   <div className="mt-4 pt-4 border-t flex justify-end gap-2">
                      <Link 
                        href={`/hospitals/${hospital.id}`}
@@ -117,7 +151,7 @@ export default function HospitalListPage() {
         )}
       </main>
 
-      {/* 비교함 바 (모달 포함) - 기존 코드와 동일하므로 그대로 사용 */}
+      {/* 비교함 (장바구니) */}
       {compareList.length > 0 && (
         <div className="fixed bottom-0 left-0 w-full bg-white border-t shadow-2xl p-4 z-40 animate-slide-up">
            <div className="max-w-4xl mx-auto flex items-center justify-between">
