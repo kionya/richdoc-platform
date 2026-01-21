@@ -18,7 +18,7 @@ export default async function Home() {
       {/* 헤더 섹션 */}
       <div className="max-w-4xl mx-auto mb-12 text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          RichDoc Global Platform (Live)
+          RichDoc Global Platform (Live11)
         </h1>
         <p className="text-gray-600 text-lg">
           검증된 한국 최고의 병원을 투명한 가격으로 만나보세요.
