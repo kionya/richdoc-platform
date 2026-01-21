@@ -93,9 +93,14 @@ export async function addReview(hospitalId: string, userName: string, rating: nu
 
 // 5. 초기 데이터 넣기 (강제 새로고침 기능 포함)
 export async function seedInitialHospitals() {
-  const count = await db.hospital.count();
-  if (count > 0) return;
+  // 1. 기존 데이터가 있으면 싹 지우고 시작 (충돌 방지!)
+  // (deleteMany를 추가해서 에러 원천 차단)
+  await db.menu.deleteMany();
+  await db.doctor.deleteMany();
+  await db.review.deleteMany();
+  await db.hospital.deleteMany();
 
+  // 2. 이제 깨끗한 상태에서 데이터 생성 시작
   await db.hospital.createMany({
     data: [
       {
