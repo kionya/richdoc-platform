@@ -28,19 +28,21 @@ model User {
 
 // 2. 병원 정보
 model Hospital {
-  id            String      @id @default(uuid())
-  name          String      // 병원 이름
-  location      String?     // 주소 (강남구 논현동...)
-  description   String?     // 병원 소개
-  isPartner     Boolean     @default(false)      // 제휴 병원 여부
-  commission    Float       @default(15.0)       // 수수료율 (기본 15%)
-  
-  treatments    Treatment[] // 이 병원의 시술 상품들
-  leads         Lead[]      // 이 병원에 접수된 상담들
-  
-  createdAt     DateTime    @default(now())
-}
+  // 👇 숫자(Int) 대신 문자(uuid)로 변경!
+  id        String   @id @default(uuid()) 
+  name      String
+  location  String
+  tags      String
+  rating    Float
+  reviews   Int
+  image     String
+  desc      String
+  createdAt DateTime @default(now())
 
+  // 👇 에러 해결을 위해 추가한 연결고리들
+  treatments Treatment[]
+  leads      Lead[]
+}
 // 3. 시술 상품 (예: 울쎄라 300샷, 코수술 등)
 model Treatment {
   id            String    @id @default(uuid())
