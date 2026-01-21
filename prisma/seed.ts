@@ -1,129 +1,71 @@
-// prisma/seed.ts
+import { PrismaClient } from '@prisma/client';
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 데이터 심기 시작...')
-
-  // 1. 기존 데이터 삭제 (중복 방지)
-  // 순서 중요: 자식(Lead, Treatment)부터 지우고 부모(User, Hospital)를 지워야 에러가 안 남
-  await prisma.settlement.deleteMany()
-  await prisma.lead.deleteMany()
-  await prisma.treatment.deleteMany()
-  await prisma.hospital.deleteMany()
-  await prisma.user.deleteMany()
-
-  console.log('🗑️ 기존 데이터 청소 완료')
-
-  // 2. 가짜 병원 3개 만들기
-  const hospitalA = await prisma.hospital.create({
-    data: {
-      name: '리쥬엘 성형외과',
-      location: '서울시 강남구 논현동',
-      description: '눈/코 재수술 전문, 20년 경력',
-      isPartner: true, // 제휴 병원
-      commission: 15.0,
-      treatments: {
-        create: [
-          {
-            name: '자연유착 쌍꺼풀',
-            category: 'EYE',
-            priceMin: 1200000,
-            priceMax: 1500000,
-            description: '흉터 없이 자연스러운 라인',
-          },
-          {
-            name: '코 전체 성형 (실리콘+귀연골)',
-            category: 'NOSE',
-            priceMin: 3500000,
-            priceMax: 4500000,
-            description: '자려한 코 라인 완성',
-          },
-        ],
+  // 1. 기존 데이터가 있으면 충돌나니까 확인 (또는 삭제)
+  // 여기서는 seed가 실행될 땐 보통 빈 DB라고 가정하고 그냥 넣습니다.
+  
+  // 2. 병원 5개 데이터 심기
+  await prisma.hospital.createMany({
+    data: [
+      {
+        name: "리쥬엘의원 강남점",
+        location: "서울 강남구 강남대로",
+        tags: "리프팅,피부관리,보톡스",
+        rating: 4.9,
+        reviews: 152,
+        image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
+        desc: "당신의 피부를 위한 프리미엄 솔루션, 리쥬엘입니다."
       },
-    },
-  })
-
-  const hospitalB = await prisma.hospital.create({
-    data: {
-      name: '고운몸 피부과',
-      location: '서울시 서초구 서초동',
-      description: '프리미엄 안티에이징 센터',
-      isPartner: true,
-      commission: 12.0,
-      treatments: {
-        create: [
-          {
-            name: '울쎄라 300샷',
-            category: 'SKIN',
-            priceMin: 990000,
-            priceMax: 1200000,
-            description: '정품팁 인증, 수면마취 가능',
-          },
-        ],
+      {
+        name: "고운몸의원",
+        location: "서울 강남구 테헤란로",
+        tags: "다이어트,체형교정,지방분해",
+        rating: 4.8,
+        reviews: 98,
+        image: "https://images.unsplash.com/photo-1571772996211-2f02c9727629?auto=format&fit=crop&w=800&q=80",
+        desc: "건강하고 아름다운 바디라인을 약속합니다."
       },
-    },
-  })
-
-  const hospitalC = await prisma.hospital.create({
-    data: {
-      name: '강남 탑 치과',
-      location: '서울시 강남구 역삼동',
-      isPartner: false, // 제휴 아님
-      treatments: {
-        create: [
-          {
-            name: '원데이 임플란트',
-            category: 'DENTAL',
-            priceMin: 800000,
-            priceMax: 1000000,
-          },
-        ],
+      {
+        name: "바노바기성형외과",
+        location: "서울 강남구 논현로",
+        tags: "안면윤곽,양악수술,가슴성형",
+        rating: 5.0,
+        reviews: 320,
+        image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80",
+        desc: "디테일이 다른 아름다움, 바노바기입니다."
       },
-    },
-  })
+      {
+        name: "바이브성형외과",
+        location: "서울 강남구 도산대로",
+        tags: "눈성형,코성형,트렌디",
+        rating: 4.7,
+        reviews: 85,
+        image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80",
+        desc: "나만의 분위기를 찾아주는 바이브 성형외과"
+      },
+      {
+        name: "삼사오성형외과",
+        location: "서울 서초구 강남대로",
+        tags: "안전지향,대형병원,종합성형",
+        rating: 4.9,
+        reviews: 210,
+        image: "https://images.unsplash.com/photo-1516549655169-df83a0674503?auto=format&fit=crop&w=800&q=80",
+        desc: "365일 4계절 5감 만족, 삼사오성형외과"
+      },
+    ],
+  });
 
-  // 3. 가짜 환자(유저) 2명 만들기
-  const user1 = await prisma.user.create({
-    data: {
-      email: 'patient1@test.com',
-      name: '김테스트',
-      role: 'PATIENT',
-      country: 'KR',
-    },
-  })
-
-  const user2 = await prisma.user.create({
-    data: {
-      email: 'global_guest@test.com',
-      name: 'Jane Doe',
-      role: 'PATIENT',
-      country: 'US',
-    },
-  })
-
-  // 4. 가짜 상담(Lead) 데이터 1개 만들기
-  await prisma.lead.create({
-    data: {
-      referralCode: 'RD-2026-TEST01',
-      status: 'PENDING',
-      concern: '눈이 너무 작아서 고민입니다.',
-      userId: user1.id,
-      hospitalId: hospitalA.id, // 리쥬엘 성형외과에 문의
-    },
-  })
-
-  console.log('🌳 데이터 심기 완료! (병원 3개, 환자 2명, 상담 1건)')
+  console.log('🌱 병원 데이터 5개 심기 완료!');
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
