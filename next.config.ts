@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   typescript: {
-    ignoreBuildErrors: true, // 이건 남겨두세요! (타입스크립트 무시)
+    ignoreBuildErrors: true,
   },
-  // ❌ eslint: { ... }  <-- 이 부분이 있으면 안 됩니다! 지워주세요.
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+export default withNextIntl(nextConfig);

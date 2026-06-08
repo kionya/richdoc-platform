@@ -1,0 +1,8 @@
+{
+  "Nav": { "findClinic": "Find Clinic", "compare": "Compare", "consult": "Consult", "bookConsultation": "Book Consultation" },
+  "Filters": { "title": "Filters", "region": "Region", "category": "Specialty", "tier": "Tier", "minRating": "Min rating", "priceRange": "Price range", "keyword": "Keyword", "search": "Search", "reset": "Reset", "all": "All", "apply": "Apply" },
+  "Tier": { "BENEFIT": "Benefit", "PARTNER": "Partner", "RECOMMENDED": "Recommended", "benefitsTitle": "Extra Benefits", "disclaimer": "Tiers indicate platform partnership, not medical superiority." },
+  "Compare": { "title": "Compare Clinics", "empty": "Add clinics to compare first.", "treatment": "Treatment", "lowest": "Lowest", "consultCta": "Consult", "back": "Back to list" },
+  "Detail": { "messengers": "Chat with us", "hours": "Opening hours", "closed": "Closed", "copy": "Copy", "copied": "Copied", "note": "Note" },
+  "Hospitals": { "title": "Partner Clinics", "subtitle": "Compare quotes from clinics you choose.", "noResults": "No clinics match your filters.", "viewDetail": "Details", "addCompare": "Add", "added": "Added" }
+}

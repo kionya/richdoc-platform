@@ -1,0 +1,8 @@
+{
+  "Nav": { "findClinic": "病院を探す", "compare": "比較", "consult": "相談申込", "bookConsultation": "相談予約" },
+  "Filters": { "title": "絞り込み", "region": "地域", "category": "診療科", "tier": "ランク", "minRating": "最低評価", "priceRange": "価格帯", "keyword": "キーワード", "search": "検索", "reset": "リセット", "all": "すべて", "apply": "適用" },
+  "Tier": { "BENEFIT": "ベネフィット", "PARTNER": "提携", "RECOMMENDED": "おすすめ", "benefitsTitle": "追加特典", "disclaimer": "ランクはプラットフォーム提携関係を示し、医療の優劣ではありません。" },
+  "Compare": { "title": "病院比較", "empty": "比較する病院を先に追加してください。", "treatment": "施術", "lowest": "最安", "consultCta": "相談", "back": "一覧へ" },
+  "Detail": { "messengers": "メッセンジャーで問い合わせ", "hours": "営業時間", "closed": "休診", "copy": "コピー", "copied": "コピー済み", "note": "備考" },
+  "Hospitals": { "title": "提携病院", "subtitle": "選んだ病院の見積もりを比較。", "noResults": "条件に合う病院がありません。", "viewDetail": "詳細", "addCompare": "追加", "added": "追加済み" }
+}
