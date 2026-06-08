@@ -1,6 +1,7 @@
 import { isCompleteI18n } from "@/lib/i18n/text";
 import type { I18nText } from "@/lib/i18n/types";
 import type { HospitalInput } from "./types";
+import { HOSPITAL_TIERS } from "./tier";
 
 export const HOSPITAL_CATEGORIES = ["PLASTIC", "DERMA", "DENTAL", "OPHTHALMOLOGY", "HAIR", "ETC"] as const;
 export type HospitalCategory = (typeof HOSPITAL_CATEGORIES)[number];
@@ -28,8 +29,7 @@ export function validateHospitalInput(input: HospitalInput): string[] {
     if (!isCompleteI18n(m.name)) errors.push(`시술 ${i + 1}: 시술명 4개 언어 필수`);
     if (!isCompleteI18n(m.priceText)) errors.push(`시술 ${i + 1}: 가격표기 4개 언어 필수`);
   });
-  const VALID_TIERS = ["RECOMMENDED", "PARTNER", "BENEFIT"];
-  if (!VALID_TIERS.includes(input.tier)) {
+  if (!(HOSPITAL_TIERS as readonly string[]).includes(input.tier)) {
     errors.push("tier가 올바르지 않습니다.");
   }
   if (input.tier === "BENEFIT" && !isCompleteI18n(input.benefits)) {
