@@ -1,3 +1,4 @@
+// 표시/열거용 순서(폼·필터 옵션). 정렬 우선순위가 아님 — 우선순위는 tierRank()가 결정한다.
 export const HOSPITAL_TIERS = ["RECOMMENDED", "PARTNER", "BENEFIT"] as const;
 export type Tier = (typeof HOSPITAL_TIERS)[number];
 

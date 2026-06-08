@@ -18,5 +18,5 @@ describe("compareHospitalsByTier", () => {
   it("같은 등급은 평점 높은 순", () => {
     expect(compareHospitalsByTier({ tier: "PARTNER", rating: 4.5 }, { tier: "PARTNER", rating: 4.9 })).toBeGreaterThan(0);
   });
-  it("상수는 3종", () => expect(HOSPITAL_TIERS.length).toBe(3));
+  it("상수는 정확한 3종", () => expect([...HOSPITAL_TIERS]).toEqual(["RECOMMENDED", "PARTNER", "BENEFIT"]));
 });
