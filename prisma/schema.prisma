@@ -68,6 +68,7 @@ model Hospital {
   userReviews Review[]
   treatments  Treatment[]
   leads       Lead[]
+  bookings    Booking[]
 
   @@index([city, category])
   @@index([isPublished])
@@ -174,4 +175,44 @@ model Consultation {
   imageUrl  String?
   password  String?
   createdAt DateTime @default(now())
+}
+
+model Booking {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  status        String   @default("NEW")
+  locale        String   @default("ko")
+
+  groupId       String?
+
+  hospitalId    String
+  hospital      Hospital @relation(fields: [hospitalId], references: [id])
+
+  name          String
+  phone         String
+  nationality   String
+  email         String?
+  age           Int?
+  gender        String?
+
+  messengerChannel String?
+  messengerHandle  String?
+
+  treatmentInterest String?
+  memo          String?
+  photo         String?
+
+  preferredDate1 DateTime
+  preferredDate2 DateTime?
+  timeOfDay      String
+
+  consent        Boolean  @default(false)
+
+  adminNote      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([hospitalId])
+  @@index([groupId])
 }
