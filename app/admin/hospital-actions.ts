@@ -1,0 +1,98 @@
+"use server";
+
+import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
+import { requireAdmin } from "./auth-actions";
+import { validateHospitalInput } from "@/lib/hospital/validation";
+import type { HospitalInput } from "@/lib/hospital/types";
+
+type Result = { ok: boolean; errors: string[]; id?: string };
+
+function scalarData(input: HospitalInput) {
+  return {
+    slug: input.slug.trim(),
+    name: input.name, intro: input.intro, about: input.about,
+    address: input.address, cautions: input.cautions,
+    city: input.city.trim(), district: input.district.trim(),
+    category: input.category, tags: input.tags,
+    image: input.image, images: input.images,
+    operatingHours: input.operatingHours, messengers: input.messengers,
+    isPublished: input.isPublished,
+  };
+}
+
+function doctorsCreate(input: HospitalInput) {
+  return input.doctors.map((d) => ({
+    name: d.name, specialty: d.specialty, image: d.image || null, order: d.order,
+  }));
+}
+
+function menusCreate(input: HospitalInput) {
+  return input.menus.map((m) => ({
+    name: m.name, category: m.category, price: m.price,
+    priceText: m.priceText, currency: m.currency, order: m.order,
+  }));
+}
+
+export async function createHospital(input: HospitalInput): Promise<Result> {
+  await requireAdmin();
+  const errors = validateHospitalInput(input);
+  if (errors.length) return { ok: false, errors };
+  try {
+    const created = await db.hospital.create({
+      data: {
+        ...scalarData(input),
+        doctors: { create: doctorsCreate(input) },
+        menus: { create: menusCreate(input) },
+      },
+    });
+    revalidatePath("/admin/hospitals");
+    revalidatePath("/");
+    return { ok: true, errors: [], id: created.id };
+  } catch (e: any) {
+    return { ok: false, errors: [e?.code === "P2002" ? "이미 존재하는 slug입니다." : "저장 실패: " + String(e?.message || e)] };
+  }
+}
+
+export async function updateHospital(id: string, input: HospitalInput): Promise<Result> {
+  await requireAdmin();
+  const errors = validateHospitalInput(input);
+  if (errors.length) return { ok: false, errors };
+  try {
+    await db.hospital.update({
+      where: { id },
+      data: {
+        ...scalarData(input),
+        doctors: { deleteMany: {}, create: doctorsCreate(input) },
+        menus: { deleteMany: {}, create: menusCreate(input) },
+      },
+    });
+    revalidatePath("/admin/hospitals");
+    revalidatePath(`/hospitals/${id}`);
+    revalidatePath("/");
+    return { ok: true, errors: [], id };
+  } catch (e: any) {
+    return { ok: false, errors: [e?.code === "P2002" ? "이미 존재하는 slug입니다." : "수정 실패: " + String(e?.message || e)] };
+  }
+}
+
+export async function deleteHospital(id: string): Promise<void> {
+  await requireAdmin();
+  try {
+    await db.menu.deleteMany({ where: { hospitalId: id } });
+    await db.doctor.deleteMany({ where: { hospitalId: id } });
+    await db.review.deleteMany({ where: { hospitalId: id } });
+    await db.hospital.delete({ where: { id } });
+    revalidatePath("/admin/hospitals");
+    revalidatePath("/");
+  } catch (e) {
+    console.error("병원 삭제 실패(연결된 상담/예약 존재 가능):", e);
+  }
+}
+
+export async function togglePublish(id: string, next: boolean): Promise<void> {
+  await requireAdmin();
+  await db.hospital.update({ where: { id }, data: { isPublished: next } });
+  revalidatePath("/admin/hospitals");
+  revalidatePath("/");
+}
