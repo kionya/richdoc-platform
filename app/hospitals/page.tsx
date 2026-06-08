@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, MapPin, Check, Plus, ArrowRight, X, RefreshCcw } from "lucide-react"; // RefreshCcw 아이콘 추가
-import { getHospitals, createConsultation, seedInitialHospitals } from "@/app/actions"; // seedInitialHospitals 추가
+import { Star, MapPin, Check, Plus, ArrowRight, X } from "lucide-react";
+import { getHospitals, createConsultation } from "@/app/actions";
 import Link from "next/link";
 
 interface Hospital {
@@ -32,15 +32,6 @@ export default function HospitalListPage() {
     // @ts-ignore
     setHospitals(data);
     setIsLoading(false);
-  };
-
-  // 👇 삭제됐던 '데이터 넣기' 기능 복구!
-  const handleSeed = async () => {
-    if (confirm("초기 데이터를 DB에 넣으시겠습니까?")) {
-      await seedInitialHospitals();
-      alert("데이터 주입 완료! 페이지를 새로고침합니다.");
-      window.location.reload();
-    }
   };
 
   const toggleCompare = (id: string) => {
@@ -73,12 +64,6 @@ export default function HospitalListPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">🏥 실시간 제휴 병원</h1>
           
-          {/* 👇 여기가 다시 살아난 버튼입니다! (데이터가 0개일 때만 보임) */}
-          {hospitals.length === 0 && !isLoading && (
-            <button onClick={handleSeed} className="text-xs bg-gray-900 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-gray-700 transition">
-              <RefreshCcw className="w-3 h-3"/> 초기 데이터 복구
-            </button>
-          )}
         </div>
         
         {isLoading ? (
@@ -86,7 +71,6 @@ export default function HospitalListPage() {
         ) : hospitals.length === 0 ? (
            <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
              <p className="text-gray-500 mb-2">등록된 병원이 없습니다.</p>
-             <p className="text-xs text-gray-400">우측 상단 '초기 데이터 복구' 버튼을 눌러주세요.</p>
            </div>
         ) : (
           <div className="grid gap-6">
