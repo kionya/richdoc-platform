@@ -57,6 +57,8 @@ model Hospital {
   messengers     Json
 
   isPublished Boolean @default(false)
+  tier      String  @default("RECOMMENDED")
+  benefits  Json    @default("{}")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -69,6 +71,7 @@ model Hospital {
 
   @@index([city, category])
   @@index([isPublished])
+  @@index([tier])
 }
 
 // 👨‍⚕️ 의사 선생님 정보

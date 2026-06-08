@@ -35,6 +35,7 @@ async function main() {
       operatingHours: hours,
       messengers: { whatsapp: "+821012345678", line: "@rejuel", wechat: "rejuel_kr", kakao: "http://pf.kakao.com/_rejuel", messenger: "", phone: "+821012345678", email: "info@rejuel.kr" },
       isPublished: true,
+      tier: "BENEFIT", benefits: t("외국인 환자 전용 통역·픽업 지원", "Free interpreter & pickup for international patients", "外籍患者专享翻译及接送", "外国人患者向け通訳・送迎サポート"),
       doctors: { create: [
         { name: t("신현진 대표원장", "Dr. Shin Hyunjin", "申贤珍院长", "シン・ヒョンジン院長"), specialty: t("피부과 전문의 / 안티에이징", "Dermatologist / Anti-aging", "皮肤科专家/抗衰老", "皮膚科専門医／アンチエイジング"), order: 0 },
       ] },
@@ -59,6 +60,7 @@ async function main() {
       operatingHours: hours,
       messengers: { whatsapp: "+821087654321", line: "@banobagi", wechat: "banobagi_cn", kakao: "", messenger: "m.me/banobagi", phone: "+821087654321", email: "global@banobagi.com" },
       isPublished: true,
+      tier: "BENEFIT", benefits: t("술후 관리 패키지 제공", "Post-op care package included", "提供术后护理套餐", "術後ケアパッケージ提供"),
       doctors: { create: [
         { name: t("반재상 대표원장", "Dr. Ban Jaesang", "潘在尚院长", "バン・ジェサン院長"), specialty: t("성형외과 전문의 / 가슴·바디", "Plastic surgeon / Breast·Body", "整形外科专家/胸部·身体", "形成外科専門医／胸・ボディ"), order: 0 },
       ] },
@@ -83,6 +85,7 @@ async function main() {
       operatingHours: hours,
       messengers: { whatsapp: "+821033334444", line: "@goeunmom", wechat: "goeunmom_kr", kakao: "", messenger: "", phone: "+821033334444", email: "info@goeunmom.kr" },
       isPublished: true,
+      tier: "RECOMMENDED", benefits: t("", "", "", ""),
       doctors: { create: [
         { name: t("김희경 대표원장", "Dr. Kim Heekyung", "金喜京院长", "キム・ヒギョン院長"), specialty: t("가정의학과 전문의 / 비만클리닉", "Family medicine specialist / Obesity clinic", "家庭医学专家/肥胖门诊", "家庭医学科専門医／肥満クリニック"), order: 0 },
       ] },
@@ -108,6 +111,7 @@ async function main() {
       operatingHours: hours,
       messengers: { whatsapp: "+821055556666", line: "@vibe", wechat: "vibe_kr", kakao: "", messenger: "m.me/vibeps", phone: "+821055556666", email: "global@vibe.kr" },
       isPublished: true,
+      tier: "RECOMMENDED", benefits: t("", "", "", ""),
       doctors: { create: [
         { name: t("유영문 대표원장", "Dr. Yoo Youngmoon", "刘永文院长", "ユ・ヨンムン院長"), specialty: t("성형외과 전문의 / 눈·코 성형", "Plastic surgeon / Eye·Nose", "整形外科专家/眼·鼻整形", "形成外科専門医／目・鼻整形"), order: 0 },
       ] },
@@ -133,6 +137,7 @@ async function main() {
       operatingHours: hours,
       messengers: { whatsapp: "+821077778888", line: "@345ps", wechat: "ps345_kr", kakao: "", messenger: "", phone: "+821077778888", email: "info@345ps.kr" },
       isPublished: true,
+      tier: "PARTNER", benefits: t("", "", "", ""),
       doctors: { create: [
         { name: t("박종림 대표원장", "Dr. Park Jonglim", "朴钟林院长", "パク・ジョンリム院長"), specialty: t("성형외과 전문의 / 거상·안티에이징", "Plastic surgeon / Lifting·Anti-aging", "整形外科专家/提升·抗衰老", "形成外科専門医／リフト・アンチエイジング"), order: 0 },
         { name: t("한규남 원장", "Dr. Han Gyunam", "韩奎南院长", "ハン・ギュナム院長"), specialty: t("성형외과 전문의 / 눈·코 재수술", "Plastic surgeon / Eye·Nose revision", "整形外科专家/眼·鼻修复", "形成外科専門医／目・鼻再手術"), order: 1 },

@@ -16,6 +16,7 @@ function valid(): HospitalInput {
     operatingHours: { mon: baseHours, tue: baseHours, wed: baseHours, thu: baseHours, fri: baseHours, sat: baseHours, sun: { open: "", close: "", closed: true }, note: full("휴무") },
     messengers: { whatsapp: "", line: "", wechat: "", kakao: "", messenger: "", phone: "", email: "" },
     isPublished: true,
+    tier: "RECOMMENDED", benefits: EMPTY_I18N,
     doctors: [{ name: full("원장"), specialty: full("피부과"), image: "", order: 0 }],
     menus: [{ name: full("슈링크"), category: "LIFTING", price: 150000, priceText: full("150,000 KRW~"), currency: "KRW", order: 0 }],
   };
@@ -51,5 +52,13 @@ describe("validateHospitalInput", () => {
   });
   it("카테고리 상수는 정확한 6종", () => {
     expect([...HOSPITAL_CATEGORIES]).toEqual(["PLASTIC", "DERMA", "DENTAL", "OPHTHALMOLOGY", "HAIR", "ETC"]);
+  });
+  it("잘못된 tier 에러", () => {
+    const v = valid(); v.tier = "GOLD";
+    expect(validateHospitalInput(v).some((e) => e.includes("tier"))).toBe(true);
+  });
+  it("BENEFIT 등급은 benefits 4언어 필수", () => {
+    const v = valid(); v.tier = "BENEFIT"; v.benefits = EMPTY_I18N;
+    expect(validateHospitalInput(v).some((e) => e.includes("benefits"))).toBe(true);
   });
 });

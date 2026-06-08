@@ -28,5 +28,12 @@ export function validateHospitalInput(input: HospitalInput): string[] {
     if (!isCompleteI18n(m.name)) errors.push(`시술 ${i + 1}: 시술명 4개 언어 필수`);
     if (!isCompleteI18n(m.priceText)) errors.push(`시술 ${i + 1}: 가격표기 4개 언어 필수`);
   });
+  const VALID_TIERS = ["RECOMMENDED", "PARTNER", "BENEFIT"];
+  if (!VALID_TIERS.includes(input.tier)) {
+    errors.push("tier가 올바르지 않습니다.");
+  }
+  if (input.tier === "BENEFIT" && !isCompleteI18n(input.benefits)) {
+    errors.push("benefits: 베네핏 등급은 추가혜택 4개 언어 필수입니다.");
+  }
   return errors;
 }

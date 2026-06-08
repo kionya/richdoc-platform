@@ -27,6 +27,8 @@ export type HospitalInput = {
   operatingHours: OperatingHours;
   messengers: Messengers;
   isPublished: boolean;
+  tier: string;
+  benefits: I18nText;
   doctors: DoctorInput[];
   menus: MenuInput[];
 };
