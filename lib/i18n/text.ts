@@ -12,6 +12,7 @@ export function toI18n(value: unknown): I18nText {
 
 export function resolveText(value: unknown, lang: Lang): string {
   const t = toI18n(value);
+  // i18n 값은 사람이 읽는 텍스트라 빈 문자열만 폴백 대상 → || 단축평가로 충분
   return t[lang] || t.en || t.ko || "";
 }
 
