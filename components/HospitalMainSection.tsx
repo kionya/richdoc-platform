@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { Star, MapPin, Check, Plus, ArrowRight, X, ShieldCheck } from "lucide-react";
 import { getHospitals, createConsultation } from "@/app/actions";
-import Link from "next/link";
 import TierBadge from "@/components/hospitals/TierBadge";
 import { useLocale } from "next-intl";
 import { resolveText } from "@/lib/i18n/text";
+import { Link, useRouter } from "@/i18n/navigation";
 
 export default function HospitalMainSection() {
   const [hospitals, setHospitals] = useState<any[]>([]);
@@ -14,6 +14,7 @@ export default function HospitalMainSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const locale = useLocale();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -140,7 +141,7 @@ export default function HospitalMainSection() {
                <button onClick={() => setCompareList([])} className="px-4 text-gray-500 font-medium hover:text-gray-800 transition">
                  초기화
                </button>
-               <button onClick={() => setIsModalOpen(true)} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-800 flex items-center shadow-lg transition transform hover:-translate-y-1">
+               <button onClick={() => router.push(`/compare?ids=${compareList.join(",")}`)} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-800 flex items-center shadow-lg transition transform hover:-translate-y-1">
                  비교견적 받기 <ArrowRight className="w-5 h-5 ml-2" />
                </button>
             </div>
