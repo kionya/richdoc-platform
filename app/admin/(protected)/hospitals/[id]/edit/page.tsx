@@ -18,6 +18,8 @@ export default async function EditHospitalPage({ params }: { params: Promise<{ i
     operatingHours: h.operatingHours as any,
     messengers: h.messengers as any,
     isPublished: h.isPublished,
+    tier: h.tier,
+    benefits: toI18n(h.benefits),
     doctors: h.doctors.map((d) => ({ name: toI18n(d.name), specialty: toI18n(d.specialty), image: d.image ?? "", order: d.order })),
     menus: h.menus.map((m) => ({ name: toI18n(m.name), category: m.category, price: m.price, priceText: toI18n(m.priceText), currency: m.currency, order: m.order })),
   };

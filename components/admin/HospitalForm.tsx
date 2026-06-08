@@ -24,7 +24,9 @@ export function emptyHospitalInput(): HospitalInput {
     address: { ...EMPTY_I18N }, cautions: { ...EMPTY_I18N },
     city: "Seoul", district: "", category: "PLASTIC", tags: "",
     image: "", images: [], operatingHours: emptyHours(), messengers: emptyMessengers(),
-    isPublished: false, doctors: [], menus: [],
+    isPublished: false,
+    tier: "RECOMMENDED", benefits: { ...EMPTY_I18N },
+    doctors: [], menus: [],
   };
 }
 
@@ -88,6 +90,17 @@ export default function HospitalForm({
         </div>
         <label htmlFor="hf-image" className="text-sm font-bold text-gray-700 mt-3 block">대표 이미지 URL</label>
         <input id="hf-image" value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="https://..." className="w-full border p-3 rounded-lg" />
+        <div className="mt-3">
+          <label className="text-sm font-bold text-gray-700">등급</label>
+          <select value={form.tier} onChange={(e) => set("tier", e.target.value)} className="w-full border p-3 rounded-lg bg-white">
+            <option value="RECOMMENDED">추천</option>
+            <option value="PARTNER">제휴</option>
+            <option value="BENEFIT">베네핏(추가혜택)</option>
+          </select>
+        </div>
+        {form.tier === "BENEFIT" && (
+          <I18nField label="추가혜택(베네핏 — 4언어 필수)" value={form.benefits} onChange={(v) => set("benefits", v)} multiline />
+        )}
         <label className="flex items-center gap-2 mt-3 text-sm font-bold">
           <input type="checkbox" checked={form.isPublished} onChange={(e) => set("isPublished", e.target.checked)} /> 공개(환자화면 노출)
         </label>
