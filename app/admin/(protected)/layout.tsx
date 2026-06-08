@@ -9,6 +9,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
         <nav className="flex gap-5 text-sm font-medium text-gray-700">
           <Link href="/admin" className="hover:text-blue-600">대시보드</Link>
           <Link href="/admin/hospitals" className="hover:text-blue-600">병원관리</Link>
+          <Link href="/admin/bookings" className="hover:text-blue-600">예약</Link>
           <Link href="/admin/consultations" className="hover:text-blue-600">상담내역</Link>
         </nav>
         <form action={logout}>
