@@ -52,4 +52,16 @@ describe("validateBookingInput", () => {
     const v = valid(); v.hospitalIds = ["a", "b", "c", "d"];
     expect(validateBookingInput(v).some((e) => e.includes("hospital"))).toBe(true);
   });
+  it("preferredDate1 잘못된 날짜 형식 에러", () => {
+    const v = valid(); v.preferredDate1 = "garbage";
+    expect(validateBookingInput(v).some((e) => e.includes("preferredDate1"))).toBe(true);
+  });
+  it("preferredDate2 비어있으면 통과", () => {
+    const v = valid(); v.preferredDate2 = "";
+    expect(validateBookingInput(v)).toEqual([]);
+  });
+  it("preferredDate2 있고 형식 틀리면 에러", () => {
+    const v = valid(); v.preferredDate2 = "not-a-date";
+    expect(validateBookingInput(v).some((e) => e.includes("preferredDate2"))).toBe(true);
+  });
 });

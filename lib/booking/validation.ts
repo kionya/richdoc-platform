@@ -9,6 +9,8 @@ export function validateBookingInput(input: BookingInput): string[] {
   if (!input.phone.trim()) errors.push("phone: 연락처는 필수입니다.");
   if (!input.nationality.trim()) errors.push("nationality: 국적은 필수입니다.");
   if (!input.preferredDate1.trim()) errors.push("preferredDate1: 1지망 날짜는 필수입니다.");
+  if (input.preferredDate1.trim() && Number.isNaN(new Date(input.preferredDate1).getTime())) errors.push("preferredDate1: 날짜 형식이 올바르지 않습니다.");
+  if (input.preferredDate2.trim() && Number.isNaN(new Date(input.preferredDate2).getTime())) errors.push("preferredDate2: 날짜 형식이 올바르지 않습니다.");
   if (!(TIME_OF_DAY as readonly string[]).includes(input.timeOfDay)) errors.push("timeOfDay: 시간대가 올바르지 않습니다.");
   if (!input.consent) errors.push("consent: 개인정보 수집·이용에 동의해야 합니다.");
   if (input.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) errors.push("email: 이메일 형식이 올바르지 않습니다.");
