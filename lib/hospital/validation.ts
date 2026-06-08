@@ -1,4 +1,5 @@
 import { isCompleteI18n } from "@/lib/i18n/text";
+import type { I18nText } from "@/lib/i18n/types";
 import type { HospitalInput } from "./types";
 
 export const HOSPITAL_CATEGORIES = ["PLASTIC", "DERMA", "DENTAL", "OPHTHALMOLOGY", "HAIR", "ETC"] as const;
@@ -11,7 +12,7 @@ export function validateHospitalInput(input: HospitalInput): string[] {
   if (!input.district.trim()) errors.push("district는 필수입니다.");
   if (!HOSPITAL_CATEGORIES.includes(input.category as HospitalCategory)) errors.push("category가 올바르지 않습니다.");
 
-  const i18nFields: [string, unknown][] = [
+  const i18nFields: [string, I18nText][] = [
     ["name", input.name], ["intro", input.intro], ["about", input.about],
     ["address", input.address], ["cautions", input.cautions],
   ];

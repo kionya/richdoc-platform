@@ -41,11 +41,15 @@ describe("validateHospitalInput", () => {
     const v = valid(); v.doctors[0].specialty = EMPTY_I18N;
     expect(validateHospitalInput(v).some((e) => e.includes("의료진"))).toBe(true);
   });
+  it("의료진 이름 누락 에러", () => {
+    const v = valid(); v.doctors[0].name = EMPTY_I18N;
+    expect(validateHospitalInput(v).some((e) => e.includes("의료진"))).toBe(true);
+  });
   it("시술 가격표기 누락 에러", () => {
     const v = valid(); v.menus[0].priceText = EMPTY_I18N;
     expect(validateHospitalInput(v).some((e) => e.includes("시술"))).toBe(true);
   });
-  it("카테고리 상수는 6종", () => {
-    expect(HOSPITAL_CATEGORIES.length).toBe(6);
+  it("카테고리 상수는 정확한 6종", () => {
+    expect([...HOSPITAL_CATEGORIES]).toEqual(["PLASTIC", "DERMA", "DENTAL", "OPHTHALMOLOGY", "HAIR", "ETC"]);
   });
 });
