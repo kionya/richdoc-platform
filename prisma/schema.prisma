@@ -12,18 +12,25 @@ datasource db {
 
 // 1. 사용자 (환자 + 병원 관리자 + 최고 관리자)
 model User {
-  id            String    @id @default(uuid()) // 고유 ID 자동생성
-  email         String    @unique              // 이메일은 중복 불가
-  password      String?                        // 비밀번호 (소셜 로그인 시 없을 수 있음)
-  role          String    @default("PATIENT")  // 역할: PATIENT, HOSPITAL, ADMIN
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String?
+  role          String    @default("PATIENT")
   name          String?
   phone         String?
-  country       String?   @default("KR")       // 국가 코드
-  
-  leads         Lead[]                         // 이 사람이 신청한 상담 내역들
-  
-  createdAt     DateTime  @default(now())      // 가입일
-  updatedAt     DateTime  @updatedAt           // 수정일
+  country       String?   @default("KR")
+
+  hospitalId    String?
+  hospital      Hospital? @relation(fields: [hospitalId], references: [id])
+  status        String    @default("ACTIVE")
+
+  leads         Lead[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([role])
+  @@index([hospitalId])
 }
 
 // 2. 병원 정보
@@ -69,6 +76,7 @@ model Hospital {
   treatments  Treatment[]
   leads       Lead[]
   bookings    Booking[]
+  users       User[]
 
   @@index([city, category])
   @@index([isPublished])
