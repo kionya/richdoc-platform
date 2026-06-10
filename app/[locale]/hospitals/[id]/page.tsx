@@ -127,12 +127,12 @@ export default async function HospitalDetailPage(props: Props) {
 
         {(() => {
           const c = resolveText(hospital.cautions, locale);
-          return c ? (
+          return (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-4">
               <h3 className="font-bold text-lg mb-2 text-amber-900">{tCompliance("cautionsTitle")}</h3>
-              <p className="text-sm text-gray-700 whitespace-pre-line">{c}</p>
+              <p className="text-sm text-gray-700 whitespace-pre-line">{c || tCompliance("cautionsFallback")}</p>
             </div>
-          ) : null;
+          );
         })()}
         <OperatingHoursTable hours={hospital.operatingHours} />
         <MessengerButtons messengers={hospital.messengers as Record<string, string>} />
