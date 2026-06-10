@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../lib/auth/password";
 
 const prisma = new PrismaClient();
 const t = (ko: string, en: string, zh: string, ja: string) => ({ ko, en, zh, ja });
@@ -148,6 +149,19 @@ async function main() {
       ] },
     },
   });
+
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL;
+  const adminPw = process.env.SUPER_ADMIN_PASSWORD;
+  if (adminEmail && adminPw) {
+    await prisma.user.upsert({
+      where: { email: adminEmail.toLowerCase() },
+      update: { role: "SUPER_ADMIN", status: "ACTIVE", passwordHash: await hashPassword(adminPw) },
+      create: { email: adminEmail.toLowerCase(), role: "SUPER_ADMIN", status: "ACTIVE", passwordHash: await hashPassword(adminPw) },
+    });
+    console.log("👑 슈퍼관리자 계정 준비:", adminEmail.toLowerCase());
+  } else {
+    console.warn("⚠️ SUPER_ADMIN_EMAIL/PASSWORD 미설정 — 슈퍼관리자 시드 스킵");
+  }
 
   console.log("🌱 다국어 병원 시드 완료");
 }
