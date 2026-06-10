@@ -1,4 +1,4 @@
-import { getHospitalById, addReview } from "@/app/actions";
+import { getHospitalById } from "@/app/actions";
 import { Star, User, DollarSign, MapPin, ArrowLeft, MessageSquare } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { resolveText } from "@/lib/i18n/text";
@@ -45,15 +45,6 @@ export default async function HospitalDetailPage(props: Props) {
 
   // 안전장치
   const tagsArray = (hospital.tags || "").split(',');
-
-  // 리뷰 작성 함수
-  async function submitReview(formData: FormData) {
-    "use server";
-    const userName = formData.get("userName") as string;
-    const content = formData.get("content") as string;
-    const rating = parseInt(formData.get("rating") as string);
-    await addReview(hospital!.id, userName, rating, content);
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -145,36 +136,7 @@ export default async function HospitalDetailPage(props: Props) {
 
         <div className="bg-white rounded-xl p-6 shadow-sm mb-20">
           <h3 className="font-bold text-lg mb-4 flex items-center"><MessageSquare className="w-5 h-5 mr-2 text-blue-600"/> {tDetail("reviewsTitle")}</h3>
-          <ComplianceNotice k="reviewDisclaimer" className="mb-3" />
-          <form action={submitReview} className="mb-8 bg-gray-50 p-4 rounded-xl border border-gray-100">
-            <div className="mb-3">
-              <input name="userName" placeholder={tDetail("reviewName")} className="border p-3 rounded-lg w-full mb-2" required />
-              <select name="rating" className="border p-3 rounded-lg w-full mb-2 bg-white">
-                <option value="5">{`⭐⭐⭐⭐⭐ (${tDetail("ratingGreat")})`}</option>
-                <option value="4">{`⭐⭐⭐⭐ (${tDetail("ratingGood")})`}</option>
-                <option value="3">{`⭐⭐⭐ (${tDetail("ratingOk")})`}</option>
-              </select>
-              <textarea name="content" placeholder={tDetail("reviewContent")} className="border p-3 rounded-lg w-full h-24 resize-none" required></textarea>
-            </div>
-            <button className="bg-blue-600 text-white px-4 py-3 rounded-xl text-sm w-full font-bold">{tDetail("reviewSubmit")}</button>
-          </form>
-
-          <div className="space-y-6">
-            {(!hospital.userReviews || hospital.userReviews.length === 0) ? (
-              <p className="text-gray-400 text-center text-sm py-4">{tDetail("noReviews")}</p>
-            ) : (
-              hospital.userReviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-100 pb-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="font-bold text-sm">{review.userName}</span>
-                    <span className="text-yellow-400 text-xs">{"⭐".repeat(review.rating)}</span>
-                  </div>
-                  <p className="text-gray-600 text-sm">{review.content}</p>
-                  <div className="text-xs text-gray-400 mt-2 text-right">{review.createdAt.toLocaleDateString()}</div>
-                </div>
-              ))
-            )}
-          </div>
+          <p className="text-gray-400 text-sm text-center py-6">{tDetail("reviewsComingSoon")}</p>
         </div>
       </div>
 
