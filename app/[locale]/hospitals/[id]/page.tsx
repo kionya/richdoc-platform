@@ -173,6 +173,7 @@ export default async function HospitalDetailPage(props: Props) {
               <Link href="/account/login" className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-bold">
                 {tDetail("reviewsTitle")}
               </Link>
+              <ComplianceNotice k="reviewDisclaimer" className="mt-4" />
             </div>
           )}
         </div>
